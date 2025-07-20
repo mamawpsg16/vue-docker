@@ -32,5 +32,5 @@ COPY --chown=appuser:appgroup app/ .
 EXPOSE 5173
 
 # Define the default command to run when the container starts
-# This command will also run as 'appuser'
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Since we're now handling --host in vite.config.js, we can simplify this
+CMD ["npm", "run", "dev"]

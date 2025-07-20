@@ -1,28 +1,46 @@
+# Define all containers/services for this application
 services:
-  vue_app:
+  vue_app:  # Service name (can be anything you want)
+    # Build configuration - creates image from Dockerfile
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: .          # Build context is current directory
+      dockerfile: Dockerfile  # Which Dockerfile to use
+    
+    # Custom container name instead of auto-generated one
     container_name: my_vue_app
-    # Explicitly set the user to 'appuser' created in the Dockerfile.
-    # This ensures the container runs as the non-root user.
+    
+    # Run container as non-root user (defined in Dockerfile)
     user: "appuser"
+    
+    # Volume mounts for development
     volumes:
-      # Mount the host's app directory to /app in the container.
-      # This allows for live code changes.
+      # Bind mount: sync local code with container for hot reload
       - ./app:/app
-      # Use a named volume specifically for node_modules.
-      # This prevents the host's node_modules from overwriting
-      # the one installed inside the container during the build.
-      # The contents of node_modules from the image will be copied
-      # into this named volume on its first creation.
+      # Named volume: isolate node_modules for better performance
       - node_modules_volume:/app/node_modules
+    
+    # Port mapping: host:container
     ports:
-      - "5173:5173"
-    command: npm run dev -- --host 0.0.0.0
-    tty: true
+      - "5173:5173"  # Access app at http://localhost:5173
+    
+    # Override Dockerfile CMD to run dev server
+    command: npm run dev
+    
+    # Terminal settings for interactive access
+    tty: true           # Allocate pseudo-TTY (-t flag)
+    stdin_open: true    # Keep STDIN open (-i flag)
+      
+    # Restart policy: auto-restart unless manually stopped
     restart: unless-stopped
+    
+    # Environment variables for file watching in Docker
+    # environment:
+      # Force polling for file changes (required in containers)
+      # - CHOKIDAR_USEPOLLING=true
+      # Poll every 1000ms (1 second) for changes
+      # - CHOKIDAR_INTERVAL=1000
 
-# Define the named volume
+# Named volumes declaration
 volumes:
+  # Persisted volume for node_modules (managed by Docker)
   node_modules_volume:
